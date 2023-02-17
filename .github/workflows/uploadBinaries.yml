@@ -19,17 +19,6 @@ jobs:
             cmake-args: ''
         runner: [macos-11]
         include:
-          - runner: ubuntu-20.04
-            os: linux
-            tar: tar
-            # Default clang (11) is broken, see LLVM issue 59622.
-            cc: clang-12
-            cxx: clang++-12
-          - runner: ubuntu-18.04
-            os: linux
-            tar: tar
-            cc: clang
-            cxx: clang++
           - runner: macos-11
             os: macos
             tar: gtar
