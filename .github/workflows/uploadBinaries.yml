@@ -1,9 +1,11 @@
 name: Upload Binaries
 
 on:
-  release:
-    types: [created]
-  workflow_dispatch:
+  pull_request:
+  # TODO delete the above and uncomment the below
+  #release:
+  #  types: [created]
+  #workflow_dispatch:
 
 jobs:
   publish:
@@ -114,8 +116,15 @@ jobs:
           ls -l circt-bin-${{ matrix.runner }}.tar.gz
           shasum -a 256 circt-bin-${{ matrix.runner }}.tar.gz
       - name: Upload Binaries
-        uses: AButler/upload-release-assets@v2.0
-        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v3
         with:
-          files: build/circt-bin-${{ matrix.runner }}.tar.gz
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          name: jackkoenig-debug-circt-bin-${{ matrix.runner}}.tar.gz
+          path: build/circt-bin-${{ matrix.runner }}.tar.gz
+          retention-days: 2
+
+        # TODO delete the above, uncomment the below
+        #  uses: AButler/upload-release-assets@v2.0
+        #  if: startsWith(github.ref, 'refs/tags/')
+        #  with:
+        #    files: build/circt-bin-${{ matrix.runner }}.tar.gz
+        #    repo-token: ${{ secrets.GITHUB_TOKEN }}
