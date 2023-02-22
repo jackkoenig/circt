@@ -2,10 +2,10 @@ name: Upload Binaries
 
 on:
   pull_request:
-  # TODO delete the above and uncomment the below
-  #release:
-  #  types: [created]
-  #workflow_dispatch:
+  # TODO delete the above
+  release:
+    types: [created]
+  workflow_dispatch:
 
 jobs:
   publish:
@@ -17,8 +17,19 @@ jobs:
             shared: OFF
             stats: ON
             cmake-args: ''
-        runner: [macos-11]
+        runner: [ubuntu-20.04, ubuntu-18.04, macos-11]
         include:
+          - runner: ubuntu-20.04
+            os: linux
+            tar: tar
+            # Default clang (11) is broken, see LLVM issue 59622.
+            cc: clang-12
+            cxx: clang++-12
+          - runner: ubuntu-18.04
+            os: linux
+            tar: tar
+            cc: clang
+            cxx: clang++
           - runner: macos-11
             os: macos
             tar: gtar
@@ -90,30 +101,34 @@ jobs:
             -DLLVM_FORCE_ENABLE_STATS=${{ matrix.build_config.stats }} \
             -DCIRCT_RELEASE_TAG_ENABLED=ON \
             -DCIRCT_RELEASE_TAG=${{ github.ref_name }} \
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF \
+            -DCMAKE_INSTALL_PREFIX=`pwd`/../install
           ninja
           ninja check-circt check-circt-unit
+          ninja install
+          cd ..
       - name: Display Files
-        run: file build/bin/*
+        run: |
+          file install/*
+          file install/bin/*
       - name: Package Binaries
         run: |
-          cd build
-          ${{ matrix.tar }} czf circt-bin-${{ matrix.runner }}.tar.gz bin
+          mv install ${{ github.ref_name }}
+          ${{ matrix.tar }} czf circt-bin-${{ matrix.runner }}.tar.gz ${{ github.ref_name }}
       - name: Show Tarball
         run: |
-          cd build
           ls -l circt-bin-${{ matrix.runner }}.tar.gz
           shasum -a 256 circt-bin-${{ matrix.runner }}.tar.gz
-      - name: Upload Binaries
+      - name: Upload Binaries (Non-Tag)
         uses: actions/upload-artifact@v3
+        if: github.ref_type != 'tag'
         with:
-          name: jackkoenig-debug-circt-bin-${{ matrix.runner}}.tar.gz
-          path: build/circt-bin-${{ matrix.runner }}.tar.gz
-          retention-days: 2
-
-        # TODO delete the above, uncomment the below
-        #  uses: AButler/upload-release-assets@v2.0
-        #  if: startsWith(github.ref, 'refs/tags/')
-        #  with:
-        #    files: build/circt-bin-${{ matrix.runner }}.tar.gz
-        #    repo-token: ${{ secrets.GITHUB_TOKEN }}
+          name: circt-bin-${{ matrix.runner }}.tar.gz
+          path: circt-bin-${{ matrix.runner }}.tar.gz
+          retention-days: 7
+      - name: Upload Binaries (Tag)
+        uses: AButler/upload-release-assets@v2.0
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: circt-bin-${{ matrix.runner }}.tar.gz
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
