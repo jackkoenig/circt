@@ -60,7 +60,7 @@ jobs:
             os: macos
             arch: x64
             tar: gtar czf
-            archive: .tar.gz
+            archive: tar.gz
             sha256: shasum -a 256
             cont: "\\"
             setup: ""
@@ -175,7 +175,6 @@ jobs:
 
       # Specify bash for the Windows runner to work
       - name: Package Binaries
-        shell: bash
         run: |
           # TODO fake delete me
           mv utils install
