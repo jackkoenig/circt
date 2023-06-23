@@ -94,72 +94,72 @@ jobs:
         run: |
           git fetch --unshallow --no-recurse-submodules
 
-            #- name: Setup Linux
-            #  if: matrix.os == 'linux'
-            #  run: sudo apt-get install ninja-build
+      - name: Setup Linux
+        if: matrix.os == 'linux'
+        run: sudo apt-get install ninja-build
 
-            #- name: Setup Ninja and GNU Tar Mac
-            #  if: matrix.os == 'macos'
-            #  run: brew install ninja gnu-tar
+      - name: Setup Ninja and GNU Tar Mac
+        if: matrix.os == 'macos'
+        run: brew install ninja gnu-tar
 
-            #- name: Build LLVM
-            #  run: |
-            #    ${{ matrix.setup }}
-            #    mkdir -p llvm/build
-            #    cd llvm/build
-            #    cmake -G Ninja ../llvm ${{ matrix.cont }}
-            #        ${{ matrix.cmake-args }} ${{ matrix.cont }}
-            #        -DCMAKE_BUILD_TYPE=${{ matrix.build_config.mode }} ${{ matrix.cont }}
-            #        -DBUILD_SHARED_LIBS=${{ matrix.build_config.shared }} ${{ matrix.cont }}
-            #        -DLLVM_BUILD_TOOLS=OFF ${{ matrix.cont }}
-            #        -DLLVM_BUILD_EXAMPLES=OFF ${{ matrix.cont }}
-            #        -DLLVM_ENABLE_ASSERTIONS=${{ matrix.build_config.assert }} ${{ matrix.cont }}
-            #        -DLLVM_ENABLE_BINDINGS=OFF ${{ matrix.cont }}
-            #        -DLLVM_ENABLE_OCAMLDOC=OFF ${{ matrix.cont }}
-            #        -DLLVM_ENABLE_PROJECTS='mlir' ${{ matrix.cont }}
-            #        -DLLVM_OPTIMIZED_TABLEGEN=ON ${{ matrix.cont }}
-            #        -DLLVM_STATIC_LINK_CXX_STDLIB=ON ${{ matrix.cont }}
-            #        -DLLVM_ENABLE_TERMINFO=OFF ${{ matrix.cont }}
-            #        -DLLVM_PARALLEL_LINK_JOBS=1 ${{ matrix.cont }}
-            #        -DLLVM_TARGETS_TO_BUILD="host" ${{ matrix.cont }}
-            #        -DLLVM_FORCE_ENABLE_STATS=${{ matrix.build_config.stats }} ${{ matrix.cont }}
-            #        -DLLVM_ENABLE_ZSTD=OFF
-            #    ninja
+      - name: Build LLVM
+        run: |
+          ${{ matrix.setup }}
+          mkdir -p llvm/build
+          cd llvm/build
+          cmake -G Ninja ../llvm ${{ matrix.cont }}
+              ${{ matrix.cmake-args }} ${{ matrix.cont }}
+              -DCMAKE_BUILD_TYPE=${{ matrix.build_config.mode }} ${{ matrix.cont }}
+              -DBUILD_SHARED_LIBS=${{ matrix.build_config.shared }} ${{ matrix.cont }}
+              -DLLVM_BUILD_TOOLS=OFF ${{ matrix.cont }}
+              -DLLVM_BUILD_EXAMPLES=OFF ${{ matrix.cont }}
+              -DLLVM_ENABLE_ASSERTIONS=${{ matrix.build_config.assert }} ${{ matrix.cont }}
+              -DLLVM_ENABLE_BINDINGS=OFF ${{ matrix.cont }}
+              -DLLVM_ENABLE_OCAMLDOC=OFF ${{ matrix.cont }}
+              -DLLVM_ENABLE_PROJECTS='mlir' ${{ matrix.cont }}
+              -DLLVM_OPTIMIZED_TABLEGEN=ON ${{ matrix.cont }}
+              -DLLVM_STATIC_LINK_CXX_STDLIB=ON ${{ matrix.cont }}
+              -DLLVM_ENABLE_TERMINFO=OFF ${{ matrix.cont }}
+              -DLLVM_PARALLEL_LINK_JOBS=1 ${{ matrix.cont }}
+              -DLLVM_TARGETS_TO_BUILD="host" ${{ matrix.cont }}
+              -DLLVM_FORCE_ENABLE_STATS=${{ matrix.build_config.stats }} ${{ matrix.cont }}
+              -DLLVM_ENABLE_ZSTD=OFF
+          ninja
 
-            ## --------
-            ## Build and test CIRCT
-            ## --------
+      # --------
+      # Build and test CIRCT
+      # --------
 
-            #- name: Build and Test CIRCT
-            #  run: |
-            #    ${{ matrix.setup }}
-            #    mkdir build
-            #    cd build
-            #    cmake -G Ninja .. ${{ matrix.cont }}
-            #      ${{ matrix.cmake-args }} ${{ matrix.cont }}
-            #      -DBUILD_SHARED_LIBS=${{ matrix.build_config.shared }} ${{ matrix.cont }}
-            #      -DCMAKE_BUILD_TYPE=${{ matrix.build_config.mode }} ${{ matrix.cont }}
-            #      -DLLVM_ENABLE_ASSERTIONS=${{ matrix.build_config.assert }} ${{ matrix.cont }}
-            #      -DMLIR_DIR="$(pwd)/../llvm/build/lib/cmake/mlir" ${{ matrix.cont }}
-            #      -DLLVM_DIR="$(pwd)/../llvm/build/lib/cmake/llvm" ${{ matrix.cont }}
-            #      -DVERILATOR_DISABLE=ON ${{ matrix.cont }}
-            #      -DLLVM_ENABLE_TERMINFO=OFF ${{ matrix.cont }}
-            #      -DLLVM_STATIC_LINK_CXX_STDLIB=ON ${{ matrix.cont }}
-            #      -DLLVM_PARALLEL_LINK_JOBS=1 ${{ matrix.cont }}
-            #      -DLLVM_FORCE_ENABLE_STATS=${{ matrix.build_config.stats }} ${{ matrix.cont }}
-            #      -DCIRCT_RELEASE_TAG_ENABLED=ON ${{ matrix.cont }}
-            #      -DCIRCT_RELEASE_TAG=firtool ${{ matrix.cont }}
-            #      -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF ${{ matrix.cont }}
-            #      -DCMAKE_INSTALL_PREFIX="$(pwd)/../install"
-            #    ninja
-            #    ninja check-circt check-circt-unit
-            #    ninja install-firtool
-            #    cd ..
+      - name: Build and Test CIRCT
+        run: |
+          ${{ matrix.setup }}
+          mkdir build
+          cd build
+          cmake -G Ninja .. ${{ matrix.cont }}
+            ${{ matrix.cmake-args }} ${{ matrix.cont }}
+            -DBUILD_SHARED_LIBS=${{ matrix.build_config.shared }} ${{ matrix.cont }}
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_config.mode }} ${{ matrix.cont }}
+            -DLLVM_ENABLE_ASSERTIONS=${{ matrix.build_config.assert }} ${{ matrix.cont }}
+            -DMLIR_DIR="$(pwd)/../llvm/build/lib/cmake/mlir" ${{ matrix.cont }}
+            -DLLVM_DIR="$(pwd)/../llvm/build/lib/cmake/llvm" ${{ matrix.cont }}
+            -DVERILATOR_DISABLE=ON ${{ matrix.cont }}
+            -DLLVM_ENABLE_TERMINFO=OFF ${{ matrix.cont }}
+            -DLLVM_STATIC_LINK_CXX_STDLIB=ON ${{ matrix.cont }}
+            -DLLVM_PARALLEL_LINK_JOBS=1 ${{ matrix.cont }}
+            -DLLVM_FORCE_ENABLE_STATS=${{ matrix.build_config.stats }} ${{ matrix.cont }}
+            -DCIRCT_RELEASE_TAG_ENABLED=ON ${{ matrix.cont }}
+            -DCIRCT_RELEASE_TAG=firtool ${{ matrix.cont }}
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF ${{ matrix.cont }}
+            -DCMAKE_INSTALL_PREFIX="$(pwd)/../install"
+          ninja
+          ninja check-circt check-circt-unit
+          ninja install-firtool
+          cd ..
 
-            #- name: Display Files
-            #  run: |
-            #    file install/*
-            #    file install/bin/*
+      - name: Display Files
+        run: |
+          file install/*
+          file install/bin/*
 
       # Specify bash for the Windows runner to work
       - name: Name Install Directory
@@ -180,8 +180,6 @@ jobs:
       - name: Package Binaries Linux and MacOS
         if: matrix.os == 'macos' || matrix.os == 'linux'
         run: |
-          # TODO fake delete me
-          mv utils install
           mv install ${{ steps.name_dir.outputs.value }}
           ${{ matrix.tar }} ${{ steps.name_archive.outputs.name }} ${{ steps.name_dir.outputs.value }}
 
@@ -190,8 +188,6 @@ jobs:
         if: matrix.os == 'windows'
         shell: pwsh
         run: |
-          # TODO fake delete me
-          mv utils install
           mv install ${{ steps.name_dir.outputs.value }}
           Compress-Archive -Path ${{ steps.name_dir.outputs.value }} -DestinationPath ${{ steps.name_archive.outputs.name }}
 
