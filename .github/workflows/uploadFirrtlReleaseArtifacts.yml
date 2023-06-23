@@ -68,7 +68,8 @@ jobs:
           - runner: windows-2019
             os: windows
             arch: x64
-            tar: tar acf
+            #tar: tar acf
+            tar: zip -r -q
             archive: zip
             sha256: sha256sum
             cont: "`"
