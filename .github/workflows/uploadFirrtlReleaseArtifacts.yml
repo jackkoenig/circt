@@ -5,7 +5,7 @@ on:
     types: [created]
   workflow_dispatch:
     inputs:
-      ref:
+      target:
         # This makes it possible to generate release artifacts for branches
         # with older versions of this workflow
         # Warning that build configuration may have changed so this won't always work
@@ -22,7 +22,7 @@ jobs:
       - name: Get CIRCT and LLVM
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.inputs.ref }} # No ref will default to SHA for triggering event
+          ref: ${{ github.event.inputs.target }} # No target will default to SHA for triggering event
           fetch-depth: 2
           submodules: "true"
 
