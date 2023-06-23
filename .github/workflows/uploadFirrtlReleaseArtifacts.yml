@@ -4,9 +4,13 @@ on:
   release:
     types: [created]
   workflow_dispatch:
-  push:
-    branches:
-      - add-windows-release-artifact
+    inputs:
+      ref:
+        # This makes it possible to generate release artifacts for branches
+        # with older versions of this workflow
+        # Warning that build configuration may have changed so this won't always work
+        description: 'Ref for which to generate release artifacts'
+        required: false
 
 jobs:
   publish-sources:
@@ -18,6 +22,7 @@ jobs:
       - name: Get CIRCT and LLVM
         uses: actions/checkout@v3
         with:
+          ref: ${{ github.event.inputs.ref }} # No ref will default to SHA for triggering event
           fetch-depth: 2
           submodules: "true"
 
@@ -68,7 +73,7 @@ jobs:
           - runner: windows-2019
             os: windows
             arch: x64
-            tar: tar czf
+            tar: tar czf # unused
             archive: zip
             sha256: sha256sum
             cont: "`"
@@ -172,13 +177,23 @@ jobs:
           NAME=firrtl-bin-${{ matrix.os }}-${{ matrix.arch }}.${{ matrix.archive }}
           echo "name=$NAME" >> "$GITHUB_OUTPUT"
 
-      - name: Package Binaries
-        shell: bash
+      - name: Package Binaries Linux and MacOS
+        if: matrix.os == 'macos' || matrix.os == 'linux'
         run: |
           # TODO fake delete me
           mv utils install
           mv install ${{ steps.name_dir.outputs.value }}
           ${{ matrix.tar }} ${{ steps.name_archive.outputs.name }} ${{ steps.name_dir.outputs.value }}
+
+      # Not sure how to create a zip in bash on Windows so using powershell
+      - name: Package Binaries Windows
+        if: matrix.os == 'windows'
+        shell: pwsh
+        run: |
+          # TODO fake delete me
+          mv utils install
+          mv install ${{ steps.name_dir.outputs.value }}
+          Compress-Archive -Path ${{ steps.name_dir.outputs.value }} -DestinationPath ${{ steps.name_archive.outputs.name }}
 
       # Specify bash for the Windows runner to work
       - name: Show Tarball
