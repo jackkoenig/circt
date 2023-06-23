@@ -50,7 +50,7 @@ jobs:
             os: linux
             arch: x64
             tar: tar czf
-            archive: .tar.gz
+            archive: tar.gz
             sha256: shasum -a 256
             cont: "\\"
             setup: ""
@@ -68,8 +68,7 @@ jobs:
           - runner: windows-2019
             os: windows
             arch: x64
-            #tar: tar acf
-            tar: zip -r -q
+            tar: tar czf
             archive: zip
             sha256: sha256sum
             cont: "`"
@@ -173,40 +172,39 @@ jobs:
           NAME=firrtl-bin-${{ matrix.os }}-${{ matrix.arch }}.${{ matrix.archive }}
           echo "name=$NAME" >> "$GITHUB_OUTPUT"
 
-      - name: Package Binaries Linux and MacOS
-        if: matrix.os == 'macos' || matrix.os == 'linux'
+      - name: Package Binaries
+        shell: bash
         run: |
           # TODO fake delete me
           mv utils install
           mv install ${{ steps.name_dir.outputs.value }}
           ${{ matrix.tar }} ${{ steps.name_archive.outputs.name }} ${{ steps.name_dir.outputs.value }}
 
-      # Not sure how to create a zip in bash on Windows so using powershell
-      - name: Package Binaries Windows
-        if: matrix.os == 'windows'
-        shell: pwsh
-        run: |
-          # TODO fake delete me
-          mv utils install
-          mv install ${{ steps.name_dir.outputs.value }}
-          Compress-Archive -Path ${{ steps.name_dir.outputs.value }} -DestinationPath ${{ steps.name_archive.outputs.name }}
-
       # Specify bash for the Windows runner to work
       - name: Show Tarball
         shell: bash
         run: |
           ls -l ${{ steps.name_archive.outputs.name }}
-          ${{ matrix.sha256 }} ${{ steps.name_archive.outputs.name }}
-      - name: Upload Binaries (Non-Tag)
+          ${{ matrix.sha256 }} ${{ steps.name_archive.outputs.name }} | cut -d ' ' -f1 > ${{ steps.name_archive.outputs.name }}.sha256
+
+      - name: Upload Binary (Non-Tag)
         uses: actions/upload-artifact@v3
         if: github.ref_type != 'tag'
         with:
           name: ${{ steps.name_archive.outputs.name }}
           path: ${{ steps.name_archive.outputs.name }}
           retention-days: 7
+      - name: Upload SHA256 (Non-Tag)
+        uses: actions/upload-artifact@v3
+        if: github.ref_type != 'tag'
+        with:
+          name: ${{ steps.name_archive.outputs.name }}.sha256
+          path: ${{ steps.name_archive.outputs.name }}.sha256
+          retention-days: 7
+
       - name: Upload Binaries (Tag)
         uses: AButler/upload-release-assets@v2.0
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: ${{ steps.name_archive.outputs.name }}
+          files: ${{ steps.name_archive.outputs.name }}*
           repo-token: ${{ secrets.GITHUB_TOKEN }}
