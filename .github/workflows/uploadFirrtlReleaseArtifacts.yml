@@ -44,12 +44,14 @@ jobs:
             assert: OFF
             shared: OFF
             stats: ON
-        runner: [windows-2019] #, ubuntu-20.04, macos-11]
+        runner: [windows-2019, ubuntu-20.04, macos-11]
         include:
           - runner: ubuntu-20.04
             os: linux
             arch: x64
-            tar: tar
+            tar: tar czf
+            archive: .tar.gz
+            sha256: shasum -a 256
             cont: "\\"
             setup: ""
             # Default clang (11) is broken, see LLVM issue 59622.
@@ -57,18 +59,21 @@ jobs:
           - runner: macos-11
             os: macos
             arch: x64
-            tar: gtar
+            tar: gtar czf
+            archive: .tar.gz
+            sha256: shasum -a 256
             cont: "\\"
             setup: ""
             cmake-args: ''
           - runner: windows-2019
             os: windows
             arch: x64
-            tar: tar
+            tar: tar acf
+            archive: zip
+            sha256: sha256sum
             cont: "`"
             setup: ./utils/find-vs.ps1
             cmake-args: ''
-            archive: firrtl-bin-${{ matrix.os }}-${{ matrix.arch }}.tar.gz
     runs-on: ${{ matrix.runner }}
     steps:
       # Clone the CIRCT repo and its submodules. Do shallow clone to save clone
@@ -160,32 +165,38 @@ jobs:
           SANITIZED=$(echo -n $BASE | tr '/' '-')
           echo "value=$SANITIZED" >> "$GITHUB_OUTPUT"
 
+      - name: Name Archive
+        id: name_archive
+        shell: bash
+        run: |
+          NAME=firrtl-bin-${{ matrix.os }}-${{ matrix.arch }}.${{ matrix.archive }}
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+
       # Specify bash for the Windows runner to work
       - name: Package Binaries
         shell: bash
         run: |
           # TODO fake delete me
           mv utils intall
-          echo ${{ matrix.archive }}
           mv install ${{ steps.name_dir.outputs.value }}
-          ${{ matrix.tar }} czf firrtl-bin-${{ matrix.os }}-${{ matrix.arch }}.tar.gz ${{ steps.name_dir.outputs.value }}
+          ${{ matrix.tar }} ${{ steps.name_archive.outputs.name }} ${{ steps.name_dir.outputs.value }}
 
       # Specify bash for the Windows runner to work
       - name: Show Tarball
         shell: bash
         run: |
-          ls -l firrtl-bin-${{ matrix.os }}-${{ matrix.arch }}.tar.gz
-          #sha256sum firrtl-bin-${{ matrix.os }}-${{ matrix.arch }}.tar.gz
+          ls -l ${{ steps.name_archive.outputs.name }}
+          ${{ matrix.sha256 }} ${{ steps.name_archive.outputs.name }}
       - name: Upload Binaries (Non-Tag)
         uses: actions/upload-artifact@v3
         if: github.ref_type != 'tag'
         with:
-          name: firrtl-bin-${{ matrix.os }}-${{ matrix.arch }}.tar.gz
-          path: firrtl-bin-${{ matrix.os }}-${{ matrix.arch }}.tar.gz
+          name: ${{ steps.name_archive.outputs.name }}
+          path: ${{ steps.name_archive.outputs.name }}
           retention-days: 7
       - name: Upload Binaries (Tag)
         uses: AButler/upload-release-assets@v2.0
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: firrtl-bin-${{ matrix.os }}-${{ matrix.arch }}.tar.gz
+          files: ${{ steps.name_archive.outputs.name }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
