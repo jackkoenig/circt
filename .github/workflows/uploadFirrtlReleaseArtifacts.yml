@@ -177,7 +177,7 @@ jobs:
         shell: bash
         run: |
           # TODO fake delete me
-          mv utils intall
+          mv utils install
           mv install ${{ steps.name_dir.outputs.value }}
           ${{ matrix.tar }} ${{ steps.name_archive.outputs.name }} ${{ steps.name_dir.outputs.value }}
 
