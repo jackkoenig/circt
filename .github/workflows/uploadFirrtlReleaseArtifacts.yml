@@ -173,13 +173,23 @@ jobs:
           NAME=firrtl-bin-${{ matrix.os }}-${{ matrix.arch }}.${{ matrix.archive }}
           echo "name=$NAME" >> "$GITHUB_OUTPUT"
 
-      # Specify bash for the Windows runner to work
-      - name: Package Binaries
+      - name: Package Binaries Linux and MacOS
+        if: matrix.os == 'macos' || matrix.os == 'linux'
         run: |
           # TODO fake delete me
           mv utils install
           mv install ${{ steps.name_dir.outputs.value }}
           ${{ matrix.tar }} ${{ steps.name_archive.outputs.name }} ${{ steps.name_dir.outputs.value }}
+
+      # Not sure how to create a zip in bash on Windows so using powershell
+      - name: Package Binaries Windows
+        if: matrix.os == 'windows'
+        shell: pwsh
+        run: |
+          # TODO fake delete me
+          mv utils install
+          mv install ${{ steps.name_dir.outputs.value }}
+          Compress-Archive -Path ${{ steps.name_dir.outputs.value }} -DestinationPath ${{ steps.name_archive.outputs.name }}
 
       # Specify bash for the Windows runner to work
       - name: Show Tarball
