@@ -138,7 +138,7 @@ jobs:
         id: add-build-config-firtool
         run: |
           # Default configuration template.
-          json='{"name":"firtool","install_target":"install-firtool install-om-linker","package_name_prefix":"firrtl-bin","mode":"release","assert":"OFF","shared":"OFF","stats":"ON"}'
+          json='{"name":"firtool","install_target":"install-firtool","package_name_prefix":"firrtl-bin","mode":"release","assert":"OFF","shared":"OFF","stats":"ON"}'
           case ${{ github.event_name }} in
             # Workflow dispatch looks to input knobs for asserts and build type.
             workflow_dispatch)
