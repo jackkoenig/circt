@@ -173,6 +173,7 @@ jobs:
           echo enable_sccache="-DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache" >> $GITHUB_OUTPUT
 # Configure
       - name: Configure CIRCT
+        shell: bash
         run: |
           ${{ steps.setup-windows.outputs.setup }}
           mkdir build
@@ -181,11 +182,13 @@ jobs:
 # Optionally test
       - name: Test CIRCT
         if: inputs.runTests
+        shell: bash
         run: |
           ${{ steps.setup-windows.outputs.setup }}
           ninja -C build check-circt check-circt-unit
       - name: Install
         if: inputs.install
+        shell: bash
         run: |
           ${{ steps.setup-windows.outputs.setup }}
           ninja -C build ${{ inputs.install }}
