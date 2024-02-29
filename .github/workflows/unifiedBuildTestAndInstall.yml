@@ -158,7 +158,7 @@ jobs:
         run: |
           echo setup=./utils/find-vs.ps1 >> "$GITHUB_OUTPUT"
           echo "SHELL_CMD=cmd /c" >> "$GITHUB_ENV"
-          echo "SHELL_QUOTE=" >> "$GITHUB_ENV"
+          echo "SHELL_QUOTE= " >> "$GITHUB_ENV"
 # Setup Caching
 #
 # Use sccache as it works on Windows.  Disable caching for non-release Windows
