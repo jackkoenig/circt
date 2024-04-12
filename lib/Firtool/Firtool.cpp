@@ -101,7 +101,8 @@ LogicalResult firtool::populateCHIRRTLToLowFIRRTL(mlir::PassManager &pm,
   pm.nest<firrtl::CircuitOp>().addPass(firrtl::createProbeDCEPass());
 
   if (opt.shouldDedup())
-    pm.nest<firrtl::CircuitOp>().addPass(firrtl::createDedupPass());
+    pm.nest<firrtl::CircuitOp>().addPass(
+        firrtl::createDedupPass(opt.shouldLogDedup()));
 
   if (opt.shouldConvertVecOfBundle()) {
     pm.addNestedPass<firrtl::CircuitOp>(firrtl::createLowerFIRRTLTypesPass(
@@ -486,6 +487,11 @@ struct FirtoolCmdOptions {
       llvm::cl::desc("Disable deduplication of structurally identical modules"),
       llvm::cl::init(false)};
 
+  llvm::cl::opt<bool> logFirrtlDedup{
+      "log-firrtl-dedup",
+      llvm::cl::desc("Emit logging information when modules deduplicate"),
+      llvm::cl::init(false)};
+
   llvm::cl::opt<firrtl::CompanionMode> companionMode{
       "grand-central-companion-mode",
       llvm::cl::desc("Specifies the handling of Grand Central companions"),
@@ -700,7 +706,8 @@ circt::firtool::FirtoolOptions::FirtoolOptions()
       preserveMode(firrtl::PreserveValues::None), enableDebugInfo(false),
       buildMode(BuildModeRelease), disableOptimization(false),
       exportChiselInterface(false), chiselInterfaceOutDirectory(""),
-      vbToBV(false), noDedup(false), companionMode(firrtl::CompanionMode::Bind),
+      vbToBV(false), noDedup(false), logDedup(false),
+      companionMode(firrtl::CompanionMode::Bind),
       disableAggressiveMergeConnections(false),
       disableHoistingHWPassthrough(true), emitOMIR(true), omirOutFile(""),
       lowerMemories(false), blackBoxRootPath(""), replSeqMem(false),
@@ -731,6 +738,7 @@ circt::firtool::FirtoolOptions::FirtoolOptions()
   chiselInterfaceOutDirectory = clOptions->chiselInterfaceOutDirectory;
   vbToBV = clOptions->vbToBV;
   noDedup = clOptions->noDedup;
+  logDedup = clOptions->logFirrtlDedup;
   companionMode = clOptions->companionMode;
   disableAggressiveMergeConnections =
       clOptions->disableAggressiveMergeConnections;

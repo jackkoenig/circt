@@ -266,6 +266,11 @@ def Dedup : Pass<"firrtl-dedup", "firrtl::CircuitOp"> {
       "Number of modules which were erased by deduplication">
   ];
   let constructor = "circt::firrtl::createDedupPass()";
+  let options = [
+    Option<"logDedup", "log-firrtl-dedup",
+           "bool", "false",
+    "Emit logging information when modules deduplicate">
+  ];
 }
 
 def EmitOMIR : Pass<"firrtl-emit-omir", "firrtl::CircuitOp"> {

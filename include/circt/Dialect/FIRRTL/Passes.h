@@ -82,7 +82,7 @@ std::unique_ptr<mlir::Pass> createVBToBVPass();
 
 std::unique_ptr<mlir::Pass> createAddSeqMemPortsPass();
 
-std::unique_ptr<mlir::Pass> createDedupPass();
+std::unique_ptr<mlir::Pass> createDedupPass(bool logDedup = false);
 
 std::unique_ptr<mlir::Pass>
 createEmitOMIRPass(mlir::StringRef outputFilename = "");

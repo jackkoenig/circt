@@ -35,6 +35,8 @@
 #include "llvm/Support/Format.h"
 #include "llvm/Support/SHA256.h"
 
+#define DEBUG_TYPE "firrtl-dedup"
+
 using namespace circt;
 using namespace firrtl;
 using hw::InnerRefAttr;
@@ -1575,6 +1577,10 @@ struct DenseMapInfo<ModuleInfo> {
 
 namespace {
 class DedupPass : public DedupBase<DedupPass> {
+public:
+  using DedupBase::logDedup;
+
+private:
   void runOnOperation() override {
     auto *context = &getContext();
     auto circuit = getOperation();
@@ -1662,6 +1668,10 @@ class DedupPass : public DedupBase<DedupPass> {
     if (result.failed())
       return signalPassFailure();
 
+    if (logDedup) {
+      llvm::errs() << "FIRRTL Deduplication:\n";
+    }
+
     for (auto [i, module] : llvm::enumerate(modules)) {
       auto moduleName = module.getModuleNameAttr();
       auto &hashAndModuleNamesOpt = hashesAndModuleNames[i];
@@ -1695,6 +1705,10 @@ class DedupPass : public DedupBase<DedupPass> {
         deduper.dedup(original, module);
         ++erasedModules;
         anythingChanged = true;
+        if (logDedup) {
+          llvm::errs() << "- dedup " << module.getModuleNameAttr() << " into "
+                       << original.getModuleNameAttr() << "\n";
+        }
         continue;
       }
       // Any module not deduplicated must be recorded.
@@ -1790,6 +1804,8 @@ class DedupPass : public DedupBase<DedupPass> {
 };
 } // end anonymous namespace
 
-std::unique_ptr<mlir::Pass> circt::firrtl::createDedupPass() {
-  return std::make_unique<DedupPass>();
+std::unique_ptr<mlir::Pass> circt::firrtl::createDedupPass(bool logDedup) {
+  auto pass = std::make_unique<DedupPass>();
+  pass->logDedup = logDedup;
+  return pass;
 }

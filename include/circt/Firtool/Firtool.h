@@ -96,6 +96,7 @@ public:
   bool shouldDisableOptimization() const { return disableOptimization; }
   bool shouldLowerMemories() const { return lowerMemories; }
   bool shouldDedup() const { return !noDedup; }
+  bool shouldLogDedup() const { return logDedup; }
   bool shouldEnableDebugInfo() const { return enableDebugInfo; }
   bool shouldIgnoreReadEnableMemories() const { return ignoreReadEnableMem; }
   bool shouldEmitOMIR() const { return emitOMIR; }
@@ -197,6 +198,11 @@ public:
 
   FirtoolOptions &setNoDedup(bool value) {
     noDedup = value;
+    return *this;
+  }
+
+  FirtoolOptions &setLogDedup(bool value) {
+    logDedup = value;
     return *this;
   }
 
@@ -370,6 +376,7 @@ private:
   std::string chiselInterfaceOutDirectory;
   bool vbToBV;
   bool noDedup;
+  bool logDedup;
   firrtl::CompanionMode companionMode;
   bool disableAggressiveMergeConnections;
   bool disableHoistingHWPassthrough;
